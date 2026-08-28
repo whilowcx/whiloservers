@@ -46,7 +46,10 @@ public class WhiloServersPlugin {
                 registerCommand(alias, entry.server, entry.permission);
             }
         }
-        logger.info("WhiloServers: loaded {} server entr{}.", entries.size(), entries.size() == 1 ? "y" : "ies");
+        logger.info("========================================");
+        logger.info(" WhiloServers v1 enabled");
+        logger.info(" Loaded {} server entr{}.", entries.size(), entries.size() == 1 ? "y" : "ies");
+        logger.info("========================================");
     }
 
     private void registerCommand(String commandName, String targetServer, String permission) {

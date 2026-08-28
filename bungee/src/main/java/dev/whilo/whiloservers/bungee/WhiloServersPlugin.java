@@ -27,7 +27,10 @@ public class WhiloServersPlugin extends Plugin {
                 getProxy().getPluginManager().registerCommand(this, new SlashCommand(alias, entry.server, entry.permission));
             }
         }
-        getLogger().info("WhiloServers: loaded " + entries.size() + " server entries.");
+        getLogger().info("========================================");
+        getLogger().info(" WhiloServers v1 enabled");
+        getLogger().info(" Loaded " + entries.size() + " server entries.");
+        getLogger().info("========================================");
     }
 
     private final class SlashCommand extends Command {
