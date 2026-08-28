@@ -82,10 +82,19 @@ public class WhiloServersPlugin {
                 player.sendMessage(legacy(lang.noPermission));
                 return;
             }
+            boolean alreadyThere = player.getCurrentServer()
+                .map(conn -> conn.getServerInfo().getName().equalsIgnoreCase(targetServer))
+                .orElse(false);
+            if (alreadyThere) {
+                player.sendMessage(legacy(lang.alreadyConnected));
+                return;
+            }
             proxy.getServer(targetServer).ifPresentOrElse(
                 server -> player.createConnectionRequest(server).connect().whenComplete((result, throwable) -> {
                     if (throwable != null || result == null || !result.isSuccessful()) {
                         player.sendMessage(legacy(lang.connectFailed.replace("%server%", targetServer)));
+                    } else {
+                        player.sendMessage(legacy(lang.connected.replace("%server%", targetServer)));
                     }
                 }),
                 () -> player.sendMessage(legacy(lang.serverNotConfigured.replace("%server%", targetServer)))
@@ -152,7 +161,9 @@ public class WhiloServersPlugin {
             stringOrDefault(root, "players-only", defaults.playersOnly),
             stringOrDefault(root, "no-permission", defaults.noPermission),
             stringOrDefault(root, "server-not-configured", defaults.serverNotConfigured),
-            stringOrDefault(root, "connect-failed", defaults.connectFailed)
+            stringOrDefault(root, "connect-failed", defaults.connectFailed),
+            stringOrDefault(root, "already-connected", defaults.alreadyConnected),
+            stringOrDefault(root, "connected", defaults.connected)
         );
     }
 
@@ -178,12 +189,17 @@ public class WhiloServersPlugin {
         final String noPermission;
         final String serverNotConfigured;
         final String connectFailed;
+        final String alreadyConnected;
+        final String connected;
 
-        Lang(String playersOnly, String noPermission, String serverNotConfigured, String connectFailed) {
+        Lang(String playersOnly, String noPermission, String serverNotConfigured, String connectFailed,
+             String alreadyConnected, String connected) {
             this.playersOnly = playersOnly;
             this.noPermission = noPermission;
             this.serverNotConfigured = serverNotConfigured;
             this.connectFailed = connectFailed;
+            this.alreadyConnected = alreadyConnected;
+            this.connected = connected;
         }
 
         static Lang defaults() {
@@ -191,7 +207,9 @@ public class WhiloServersPlugin {
                 "&cOnly players can use this command.",
                 "&cYou don't have permission to use this command.",
                 "&cServer %server% is not configured.",
-                "&cUnable to connect to %server%."
+                "&cUnable to connect to %server%.",
+                "&cYou are already on this server.",
+                "&aConnected to %server%."
             );
         }
     }

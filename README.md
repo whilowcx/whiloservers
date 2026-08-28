@@ -45,6 +45,8 @@ players-only: '&cOnly players can use this command.'
 no-permission: '&cYou don''t have permission to use this command.'
 server-not-configured: '&cServer %server% is not configured.'
 connect-failed: '&cUnable to connect to %server%.'
+already-connected: '&cYou are already on this server.'
+connected: '&aConnected to %server%.'
 ```
 
 `&` color codes and the `%server%` placeholder are supported.

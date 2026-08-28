@@ -1,5 +1,6 @@
 package dev.whilo.whiloservers.bungee;
 
+import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -61,12 +62,22 @@ public class WhiloServersPlugin extends Plugin {
                 player.sendMessage(legacy(lang.noPermission));
                 return;
             }
+            if (player.getServer() != null && player.getServer().getInfo().getName().equalsIgnoreCase(targetServer)) {
+                player.sendMessage(legacy(lang.alreadyConnected));
+                return;
+            }
             ServerInfo server = getProxy().getServerInfo(targetServer);
             if (server == null) {
                 player.sendMessage(legacy(lang.serverNotConfigured.replace("%server%", targetServer)));
                 return;
             }
-            player.connect(server);
+            player.connect(server, (Callback<Boolean>) (result, error) -> {
+                if (error != null || result == null || !result) {
+                    player.sendMessage(legacy(lang.connectFailed.replace("%server%", targetServer)));
+                } else {
+                    player.sendMessage(legacy(lang.connected.replace("%server%", targetServer)));
+                }
+            });
         }
     }
 
@@ -126,7 +137,9 @@ public class WhiloServersPlugin extends Plugin {
             stringOrDefault(root, "players-only", defaults.playersOnly),
             stringOrDefault(root, "no-permission", defaults.noPermission),
             stringOrDefault(root, "server-not-configured", defaults.serverNotConfigured),
-            stringOrDefault(root, "connect-failed", defaults.connectFailed)
+            stringOrDefault(root, "connect-failed", defaults.connectFailed),
+            stringOrDefault(root, "already-connected", defaults.alreadyConnected),
+            stringOrDefault(root, "connected", defaults.connected)
         );
     }
 
@@ -152,12 +165,17 @@ public class WhiloServersPlugin extends Plugin {
         final String noPermission;
         final String serverNotConfigured;
         final String connectFailed;
+        final String alreadyConnected;
+        final String connected;
 
-        Lang(String playersOnly, String noPermission, String serverNotConfigured, String connectFailed) {
+        Lang(String playersOnly, String noPermission, String serverNotConfigured, String connectFailed,
+             String alreadyConnected, String connected) {
             this.playersOnly = playersOnly;
             this.noPermission = noPermission;
             this.serverNotConfigured = serverNotConfigured;
             this.connectFailed = connectFailed;
+            this.alreadyConnected = alreadyConnected;
+            this.connected = connected;
         }
 
         static Lang defaults() {
@@ -165,7 +183,9 @@ public class WhiloServersPlugin extends Plugin {
                 "&cOnly players can use this command.",
                 "&cYou don't have permission to use this command.",
                 "&cServer %server% is not configured.",
-                "&cUnable to connect to %server%."
+                "&cUnable to connect to %server%.",
+                "&cYou are already on this server.",
+                "&aConnected to %server%."
             );
         }
     }
