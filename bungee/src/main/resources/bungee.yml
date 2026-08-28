@@ -1,0 +1,4 @@
+name: WhiloServers
+main: dev.whilo.whiloservers.bungee.WhiloServersPlugin
+version: v1
+author: whilo

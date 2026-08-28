@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>dev.whilo</groupId>
+  <artifactId>whiloservers-parent</artifactId>
+  <version>v1</version>
+  <packaging>pom</packaging>
+
+  <name>WhiloServers</name>
+  <description>Registers a slash command (with optional aliases and per-server permissions) for every server on a Velocity or BungeeCord proxy.</description>
+
+  <modules>
+    <module>velocity</module>
+    <module>bungee</module>
+  </modules>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>papermc</id>
+      <url>https://repo.papermc.io/repository/maven-public/</url>
+    </repository>
+  </repositories>
+</project>

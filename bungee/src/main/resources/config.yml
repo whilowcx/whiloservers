@@ -1,0 +1,21 @@
+# WhiloServers config
+#
+# Each entry registers a "/<server>" command that connects the player to that server,
+# plus any optional aliases listed under "commands".
+#
+# permission: optional. Leave it empty ('') so everyone can use the command,
+# or set a permission node to restrict it to staff (e.g. 'whiloservers.backrooms').
+# Players without the permission won't be able to run the command at all.
+servers:
+-   server: auth
+    permission: ''
+    commands: []
+-   server: lobby
+    permission: ''
+    # Aliases to /lobby command - you can use listed command instead of /lobby
+    commands:
+    - hub
+-   server: skyblock
+    permission: ''
+    commands:
+    - sb
