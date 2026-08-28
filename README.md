@@ -15,8 +15,8 @@ A tiny proxy plugin that registers a `/<server>` command for every backend serve
    - `WhiloServers-Velocity-v1.jar` for Velocity
    - `WhiloServers-Bungee-v1.jar` for BungeeCord/Waterfall
 2. Drop it into your proxy's `plugins/` folder
-3. Start the proxy once to generate `plugins/whiloservers/config.yml`
-4. Edit the config to match your servers, then restart or reload the proxy
+3. Start the proxy once to generate `plugins/whiloservers/config.yml` and `plugins/whiloservers/lang.yml`
+4. Edit the config to match your servers (and the messages in `lang.yml` if you want), then restart or reload the proxy
 
 ## Configuration
 
@@ -37,6 +37,17 @@ servers:
 - `server`: the exact name of the server as registered in `velocity.toml` / BungeeCord's `config.yml`
 - `permission`: leave empty (`''`) to allow everyone, or set a permission node to restrict the command (and its aliases) to players who have it
 - `commands`: extra command names that behave exactly like `/<server>`
+
+### Messages (`lang.yml`)
+
+```yaml
+players-only: '&cOnly players can use this command.'
+no-permission: '&cYou don''t have permission to use this command.'
+server-not-configured: '&cServer %server% is not configured.'
+connect-failed: '&cUnable to connect to %server%.'
+```
+
+`&` color codes and the `%server%` placeholder are supported.
 
 ## Building from source
 

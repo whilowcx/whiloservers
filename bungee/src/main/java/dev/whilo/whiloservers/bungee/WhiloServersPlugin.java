@@ -1,5 +1,6 @@
 package dev.whilo.whiloservers.bungee;
 
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -18,8 +19,11 @@ import java.util.Map;
 
 public class WhiloServersPlugin extends Plugin {
 
+    private Lang lang = Lang.defaults();
+
     @Override
     public void onEnable() {
+        lang = loadLang();
         List<ServerEntry> entries = loadConfig();
         for (ServerEntry entry : entries) {
             getProxy().getPluginManager().registerCommand(this, new SlashCommand(entry.server, entry.server, entry.permission));
@@ -31,6 +35,10 @@ public class WhiloServersPlugin extends Plugin {
         getLogger().info(" WhiloServers v1 enabled");
         getLogger().info(" Loaded " + entries.size() + " server entries.");
         getLogger().info("========================================");
+    }
+
+    private static TextComponent legacy(String message) {
+        return new TextComponent(ChatColor.translateAlternateColorCodes('&', message));
     }
 
     private final class SlashCommand extends Command {
@@ -46,67 +54,85 @@ public class WhiloServersPlugin extends Plugin {
         @Override
         public void execute(CommandSender sender, String[] args) {
             if (!(sender instanceof ProxiedPlayer player)) {
-                sender.sendMessage(new TextComponent("Only players can use this command."));
+                sender.sendMessage(legacy(lang.playersOnly));
                 return;
             }
             if (permission != null && !permission.isEmpty() && !player.hasPermission(permission)) {
-                player.sendMessage(new TextComponent("You don't have permission to use this command."));
+                player.sendMessage(legacy(lang.noPermission));
                 return;
             }
             ServerInfo server = getProxy().getServerInfo(targetServer);
             if (server == null) {
-                player.sendMessage(new TextComponent("Server " + targetServer + " is not configured."));
+                player.sendMessage(legacy(lang.serverNotConfigured.replace("%server%", targetServer)));
                 return;
             }
             player.connect(server);
         }
     }
 
-    private List<ServerEntry> loadConfig() {
-        List<ServerEntry> result = new ArrayList<>();
+    private Map<?, ?> loadYamlResource(String fileName) {
         try {
             if (!getDataFolder().exists()) {
                 getDataFolder().mkdirs();
             }
-            File configFile = new File(getDataFolder(), "config.yml");
-            if (!configFile.exists()) {
-                try (InputStream in = getResourceAsStream("config.yml")) {
+            File file = new File(getDataFolder(), fileName);
+            if (!file.exists()) {
+                try (InputStream in = getResourceAsStream(fileName)) {
                     if (in != null) {
-                        Files.copy(in, configFile.toPath());
+                        Files.copy(in, file.toPath());
                     }
                 }
             }
-            Yaml yaml = new Yaml();
-            try (InputStream in = Files.newInputStream(configFile.toPath())) {
-                Map<?, ?> root = yaml.load(in);
-                if (root == null) {
-                    return result;
-                }
-                Object serversObj = root.get("servers");
-                if (serversObj instanceof List<?> list) {
-                    for (Object o : list) {
-                        if (o instanceof Map<?, ?> map) {
-                            Object serverName = map.get("server");
-                            if (serverName == null) {
-                                continue;
-                            }
-                            String permission = map.get("permission") == null ? "" : String.valueOf(map.get("permission"));
-                            List<String> commands = new ArrayList<>();
-                            Object cmdsObj = map.get("commands");
-                            if (cmdsObj instanceof List<?> cmdList) {
-                                for (Object c : cmdList) {
-                                    commands.add(String.valueOf(c));
-                                }
-                            }
-                            result.add(new ServerEntry(String.valueOf(serverName), permission, commands));
-                        }
-                    }
-                }
+            try (InputStream in = Files.newInputStream(file.toPath())) {
+                Map<?, ?> root = new Yaml().load(in);
+                return root == null ? Map.of() : root;
             }
         } catch (IOException e) {
-            getLogger().severe("Failed to load WhiloServers config.yml: " + e.getMessage());
+            getLogger().severe("Failed to load WhiloServers " + fileName + ": " + e.getMessage());
+            return Map.of();
+        }
+    }
+
+    private List<ServerEntry> loadConfig() {
+        List<ServerEntry> result = new ArrayList<>();
+        Map<?, ?> root = loadYamlResource("config.yml");
+        Object serversObj = root.get("servers");
+        if (serversObj instanceof List<?> list) {
+            for (Object o : list) {
+                if (o instanceof Map<?, ?> map) {
+                    Object serverName = map.get("server");
+                    if (serverName == null) {
+                        continue;
+                    }
+                    String permission = map.get("permission") == null ? "" : String.valueOf(map.get("permission"));
+                    List<String> commands = new ArrayList<>();
+                    Object cmdsObj = map.get("commands");
+                    if (cmdsObj instanceof List<?> cmdList) {
+                        for (Object c : cmdList) {
+                            commands.add(String.valueOf(c));
+                        }
+                    }
+                    result.add(new ServerEntry(String.valueOf(serverName), permission, commands));
+                }
+            }
         }
         return result;
+    }
+
+    private Lang loadLang() {
+        Map<?, ?> root = loadYamlResource("lang.yml");
+        Lang defaults = Lang.defaults();
+        return new Lang(
+            stringOrDefault(root, "players-only", defaults.playersOnly),
+            stringOrDefault(root, "no-permission", defaults.noPermission),
+            stringOrDefault(root, "server-not-configured", defaults.serverNotConfigured),
+            stringOrDefault(root, "connect-failed", defaults.connectFailed)
+        );
+    }
+
+    private static String stringOrDefault(Map<?, ?> root, String key, String defaultValue) {
+        Object value = root.get(key);
+        return value == null ? defaultValue : String.valueOf(value);
     }
 
     private static final class ServerEntry {
@@ -118,6 +144,29 @@ public class WhiloServersPlugin extends Plugin {
             this.server = server;
             this.permission = permission;
             this.commands = commands;
+        }
+    }
+
+    private static final class Lang {
+        final String playersOnly;
+        final String noPermission;
+        final String serverNotConfigured;
+        final String connectFailed;
+
+        Lang(String playersOnly, String noPermission, String serverNotConfigured, String connectFailed) {
+            this.playersOnly = playersOnly;
+            this.noPermission = noPermission;
+            this.serverNotConfigured = serverNotConfigured;
+            this.connectFailed = connectFailed;
+        }
+
+        static Lang defaults() {
+            return new Lang(
+                "&cOnly players can use this command.",
+                "&cYou don't have permission to use this command.",
+                "&cServer %server% is not configured.",
+                "&cUnable to connect to %server%."
+            );
         }
     }
 }
