@@ -44,7 +44,7 @@ public class WhiloServersPlugin {
         List<ServerEntry> entries = loadConfig();
         for (ServerEntry entry : entries) {
             registerCommand(entry.server, entry.server, entry.permission);
-            for (String alias : entry.commands) {
+            for (String alias : entry.aliases) {
                 registerCommand(alias, entry.server, entry.permission);
             }
         }
@@ -132,23 +132,24 @@ public class WhiloServersPlugin {
         List<ServerEntry> result = new ArrayList<>();
         Map<?, ?> root = loadYamlResource("config.yml");
         Object serversObj = root.get("servers");
-        if (serversObj instanceof List<?> list) {
-            for (Object o : list) {
-                if (o instanceof Map<?, ?> map) {
-                    Object serverName = map.get("server");
-                    if (serverName == null) {
-                        continue;
-                    }
-                    String permission = map.get("permission") == null ? "" : String.valueOf(map.get("permission"));
-                    List<String> commands = new ArrayList<>();
-                    Object cmdsObj = map.get("commands");
-                    if (cmdsObj instanceof List<?> cmdList) {
-                        for (Object c : cmdList) {
-                            commands.add(String.valueOf(c));
+        if (serversObj instanceof Map<?, ?> serversMap) {
+            for (Map.Entry<?, ?> entry : serversMap.entrySet()) {
+                String serverName = String.valueOf(entry.getKey());
+                List<String> aliases = new ArrayList<>();
+                String permission = "";
+                if (entry.getValue() instanceof Map<?, ?> details) {
+                    Object aliasesObj = details.get("aliases");
+                    if (aliasesObj instanceof List<?> aliasList) {
+                        for (Object a : aliasList) {
+                            aliases.add(String.valueOf(a));
                         }
                     }
-                    result.add(new ServerEntry(String.valueOf(serverName), permission, commands));
+                    Object permissionObj = details.get("permission");
+                    if (permissionObj != null) {
+                        permission = String.valueOf(permissionObj);
+                    }
                 }
+                result.add(new ServerEntry(serverName, permission, aliases));
             }
         }
         return result;
@@ -175,12 +176,12 @@ public class WhiloServersPlugin {
     private static final class ServerEntry {
         final String server;
         final String permission;
-        final List<String> commands;
+        final List<String> aliases;
 
-        ServerEntry(String server, String permission, List<String> commands) {
+        ServerEntry(String server, String permission, List<String> aliases) {
             this.server = server;
             this.permission = permission;
-            this.commands = commands;
+            this.aliases = aliases;
         }
     }
 

@@ -24,19 +24,16 @@ Same format on both platforms:
 
 ```yaml
 servers:
--   server: lobby
-    permission: ''
-    # Aliases to /lobby command - you can use listed command instead of /lobby
-    commands:
-    - hub
--   server: backrooms
+  lobby:
+    aliases:
+      - hub
+  backrooms:
     permission: 'whiloservers.backrooms'
-    commands: []
 ```
 
-- `server`: the exact name of the server as registered in `velocity.toml` / BungeeCord's `config.yml`
-- `permission`: leave empty (`''`) to allow everyone, or set a permission node to restrict the command (and its aliases) to players who have it
-- `commands`: extra command names that behave exactly like `/<server>`
+- the key (e.g. `lobby`) is the exact name of the server as registered in `velocity.toml` / BungeeCord's `config.yml`
+- `permission`: optional, omit it or leave empty (`''`) to allow everyone, or set a permission node to restrict the command (and its aliases) to players who have it
+- `aliases`: optional, extra command names that behave exactly like `/<server>`
 
 ### Messages (`lang.yml`)
 
