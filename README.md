@@ -27,8 +27,8 @@ servers:
   lobby:
     aliases:
       - hub
-  backrooms:
-    permission: 'whiloservers.backrooms'
+  auth:
+    permission: 'whiloservers.auth'
 ```
 
 - the key (e.g. `lobby`) is the exact name of the server as registered in `velocity.toml` / BungeeCord's `config.yml`
