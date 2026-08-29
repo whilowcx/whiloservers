@@ -2,9 +2,9 @@
 #
 # '&' color codes are supported (e.g. &c = red).
 # %server% is replaced with the target server name where applicable.
-players-only: '&cOnly players can use this command.'
-no-permission: '&cYou don''t have permission to use this command.'
-server-not-configured: '&cServer %server% is not configured.'
-connect-failed: '&cUnable to connect to %server%.'
-already-connected: '&cYou are already on this server.'
-connected: '&aConnected to %server%.'
+players-only: "&cOnly players can use this command."
+no-permission: "&cYou don't have permission to use this command."
+server-not-configured: "&cServer %server% is not configured."
+connect-failed: "&cUnable to connect to %server%."
+already-connected: "&cYou are already on this server."
+connected: "&aConnected to %server%."
